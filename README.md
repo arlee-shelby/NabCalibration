@@ -35,4 +35,4 @@ root [1] Looper()
 This will output batch files for the runs you specify in the .cpp file in the "JobScripts" folder. It will also output a fild like "SubmitManyJobsGT.sh" that makes each run batch file executable and submits the batch job to GT. 
 
 ## Data Analysis
-Once the data has been process, you can follow the jupyter-notebook "" on how I analyze the data. 
+Once the data has been process, you can follow the jupyter-notebook "DataAnalysisExample" which shows how I read out the .json files and calibrate data. All the functions and data you need to run the notebook are in this repo. 
