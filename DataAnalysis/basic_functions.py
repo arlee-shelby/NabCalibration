@@ -1,5 +1,5 @@
 import numpy as np
-from lmfit import Minimizer
+from lmfit import Minimizer, Parameters
 from scipy import special
 import json
 
@@ -24,6 +24,27 @@ def get_hist_data_uncert(data):
         if alpha[k]<1:
             alpha[k]=1
     return alpha
+
+def linear_model(params, x):
+    m = params['m'].value
+    b = params['b'].value
+    return m * x + b
+
+def linear_residual(params, x, y, yerr):
+    model = linear_model(params,x)
+    residual = (model - y) / yerr
+    return residual
+
+def quad_model(params, x):
+    q = params['q'].value
+    m = params['m'].value
+    b = params['b'].value
+    return q * x**2 + m*x + b
+
+def quad_residual(params, x, y, yerr):
+    model = quad_model(params,x)
+    residual = (model - y) / yerr
+    return residual
 
 def get_fit(model,residuals,params,xdat,ydat,alpha):
     mini = Minimizer(residuals, params, fcn_args=(xdat, ydat, alpha))
@@ -81,3 +102,83 @@ def get_results_df(results, energy, bin_edges, pixels, run_numbers, plot=False,p
         else:
             non_empty_df[i] = df[i]
     return non_empty_df
+
+def get_cal_peaks_df(result_df,simulated_keV_values,simulated_keV_errors):
+    df = {}
+    pixels = list(result_df.keys())
+    for i in range(len(pixels)):
+        df[pixels[i]] = {}
+        runs = list(result_df[pixels[i]].keys())
+        for j in range(len(runs)):
+            df[pixels[i]][runs[j]] = {}
+            run_results = result_df[pixels[i]][runs[j]]
+            try:
+                df[pixels[i]][runs[j]]['peak1'] = run_results[0]['cen1']
+                df[pixels[i]][runs[j]]['peak2'] = run_results[0]['cen2']
+                df[pixels[i]][runs[j]]['peak1']['keV value'] = simulated_keV_values[0]
+                df[pixels[i]][runs[j]]['peak1']['keV error'] = simulated_keV_errors[0]
+                df[pixels[i]][runs[j]]['peak2']['keV value'] = simulated_keV_values[1]
+                df[pixels[i]][runs[j]]['peak2']['keV error'] = simulated_keV_errors[1]
+            except Exception as e:
+                print(pixels[i],runs[j],e,1)
+
+            try:
+                df[pixels[i]][runs[j]]['peak3'] = run_results[1]['cen1']
+                df[pixels[i]][runs[j]]['peak4'] = run_results[1]['cen2']
+                df[pixels[i]][runs[j]]['peak5'] = run_results[1]['cen3']
+                df[pixels[i]][runs[j]]['peak3']['keV value'] = simulated_keV_values[2]
+                df[pixels[i]][runs[j]]['peak3']['keV error'] = simulated_keV_errors[2]
+                df[pixels[i]][runs[j]]['peak4']['keV value'] = simulated_keV_values[3]
+                df[pixels[i]][runs[j]]['peak4']['keV error'] = simulated_keV_errors[3]
+                df[pixels[i]][runs[j]]['peak5']['keV value'] = simulated_keV_values[4]
+                df[pixels[i]][runs[j]]['peak5']['keV error'] = simulated_keV_errors[4]
+            except Exception as e:
+                print(pixels[i],runs[j],e,2)
+            
+            try:
+                df[pixels[i]][runs[j]]['peak6'] = run_results[2]['cen1']
+                df[pixels[i]][runs[j]]['peak7'] = run_results[2]['cen2']
+                df[pixels[i]][runs[j]]['peak8'] = run_results[2]['cen3']
+                df[pixels[i]][runs[j]]['peak6']['keV value'] = simulated_keV_values[5]
+                df[pixels[i]][runs[j]]['peak6']['keV error'] = simulated_keV_errors[5]
+                df[pixels[i]][runs[j]]['peak7']['keV value'] = simulated_keV_values[6]
+                df[pixels[i]][runs[j]]['peak7']['keV error'] = simulated_keV_errors[6]
+                df[pixels[i]][runs[j]]['peak8']['keV value'] = simulated_keV_values[7]
+                df[pixels[i]][runs[j]]['peak8']['keV error'] = simulated_keV_errors[7]
+            except Exception as e:
+                print(pixels[i],runs[j],e,3)
+
+    return df
+
+def calibrate_data(calibration_data_points,calibration_order='linear'):
+    df = {}
+    if calibration_order=='linear':
+        model = linear_model
+        residuals = linear_residual
+    if calibration_order=='quadratic':
+        model = quad_model
+        residuals = quad_residual
+    pixels = list(calibration_data_points.keys())
+    for i in range(len(pixels)):
+        df[pixels[i]] = {}
+        runs = list(calibration_data_points[pixels[i]].keys())
+        for j in range(len(runs)):
+            peaks = list(calibration_data_points[pixels[i]][runs[j]].keys())
+            peak_values = []
+            peak_errors = []
+            keV_values = []
+            keV_errors = []
+            for k in range(len(peaks)):
+                peak_values.append(calibration_data_points[pixels[i]][runs[j]][peaks[k]]['value'])
+                peak_errors.append(calibration_data_points[pixels[i]][runs[j]][peaks[k]]['error'])
+                keV_values.append(calibration_data_points[pixels[i]][runs[j]][peaks[k]]['keV value'])
+                keV_errors.append(calibration_data_points[pixels[i]][runs[j]][peaks[k]]['keV error'])
+            params = Parameters()
+            params.add('m', value=3)
+            params.add('b', value=0)
+            if calibration_order=='quadratic':
+                params.add('q', value=1e-5)
+            bestfit, results = get_fit(model,residuals,params,np.array(keV_values),np.array(peak_values),np.array(peak_errors))
+            df[pixels[i]][runs[j]] = results
+    return df
+
