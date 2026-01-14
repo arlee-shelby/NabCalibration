@@ -175,7 +175,7 @@ def get_cal_peaks_df(result_df,simulated_keV_values,simulated_keV_errors):
 
     return df, width_df, amp_df
 
-def calibrate_data(calibration_data_points,calibration_amplitude,calibration_order='linear',uncertainty_scaling=False):
+def calibrate_data(calibration_data_points,calibration_amplitude,calibration_order='linear',uncertainty_scaling=False,detector='UDET'):
     df = {}
     if calibration_order=='linear':
         model = linear_model
@@ -189,7 +189,12 @@ def calibrate_data(calibration_data_points,calibration_amplitude,calibration_ord
         runs = list(calibration_data_points[pixels[i]].keys())
         for j in range(len(runs)):
             peaks = list(calibration_data_points[pixels[i]][runs[j]].keys())
+            if len(peaks)==8 and detector=='LDET' and (calibration_amplitude[pixels[i]][runs[j]]['peak1']['value']<25 or calibration_amplitude[pixels[i]][runs[j]]['peak2']['value']<20):
+                # print(pixels[i],runs[j])
+                peaks = list(calibration_data_points[pixels[i]][runs[j]].keys())[2:]
             if len(peaks)>=6 and calibration_amplitude[pixels[i]][runs[j]]['peak3']['value']>50:
+                if detector=='LDET' and (calibration_amplitude[pixels[i]][runs[j]]['peak4']['value']>1 or calibration_amplitude[pixels[i]][runs[j]]['peak5']['value']>1):
+                    continue
                 peak_values = []
                 peak_errors = []
                 keV_values = []
@@ -248,25 +253,28 @@ def get_calibration_param_props(param_df,weighted=False):
     standard_deviation = {}
     average_error = {}
     for pixel in pixels:
-        runs = list(param_df[pixel].keys())
-        values = []
-        errors = []
-        for run in runs:
-            values.append(param_df[pixel][run]['value'])
-            errors.append(param_df[pixel][run]['error'])
-        average_error[pixel] = np.average(errors)
-        if weighted==False:
-            average[pixel] = np.average(values)
-            if len(runs)==1:
-                continue
-            else:
-                standard_deviation[pixel] = np.std(values)
-        if weighted==True:
-            average[pixel] = np.average(values,weights=errors)
-            if len(runs)==1:
-                continue
-            else:
-                weights = 1/(np.array(errors)**2)
-                varience = 1/np.sum(weights)
-                standard_deviation[pixel] = np.sqrt(varience)
+        if pixel =='95' or pixel=='1043' or pixel=='1054':
+            continue
+        else:
+            runs = list(param_df[pixel].keys())
+            values = []
+            errors = []
+            for run in runs:
+                values.append(param_df[pixel][run]['value'])
+                errors.append(param_df[pixel][run]['error'])
+            average_error[pixel] = np.average(errors)
+            if weighted==False:
+                average[pixel] = np.average(values)
+                if len(runs)==1:
+                    continue
+                else:
+                    standard_deviation[pixel] = np.std(values)
+            if weighted==True:
+                average[pixel] = np.average(values,weights=errors)
+                if len(runs)==1:
+                    continue
+                else:
+                    weights = 1/(np.array(errors)**2)
+                    varience = 1/np.sum(weights)
+                    standard_deviation[pixel] = np.sqrt(varience)
     return average,average_error,standard_deviation

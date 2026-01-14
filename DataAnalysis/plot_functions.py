@@ -32,16 +32,25 @@ def plot_goodness_of_fit(results,chi2=False,reduced_chi2=False,bottom_ylim=None,
     ax.set_xticks(range(int(pixels[0]),int(pixels[-1]),10))
     ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
 
-def plot_calibration_param_props(param_prop_df,yscale='linear'):
+def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df=None):
     nrows,ncols=1,1
     py.figure(figsize=((6)*ncols,(4)*nrows))
     ax=py.subplot(nrows,ncols,1)
+
     pixels = list(param_prop_df.keys())
+    int_pixels = list(map(int, pixels))
     values = list(param_prop_df.values())
-    ax.set_xticks(range(int(pixels[0]),int(pixels[-1]),10))
-    ax.scatter(list(param_prop_df.keys()),values)
+    ax.scatter(int_pixels,values,color='C0')
     mean = np.average(values)
-    ax.axhline(mean,linestyle='dashed',label = 'Average: %.2e'%mean)
+    ax.axhline(mean,linestyle='dashed',label = 'Average: %.2e'%mean,color='C0')
+    if LDETparam_prop_df!=None:
+        LDETpixels = list(LDETparam_prop_df.keys())
+        LDETvalues = list(LDETparam_prop_df.values())
+        LDETint_pixels = list(map(int, LDETpixels))
+        ax.scatter(np.array(LDETint_pixels)-1000,LDETvalues,color='C1')
+        mean = np.average(LDETvalues)
+        ax.axhline(mean,linestyle='dashed',label = 'Average: %.2e'%mean,color='C1')
+    ax.set_xticks(range(min(int_pixels),max(int_pixels),10))
     ax.set_yscale(yscale)
     ax.legend()
 

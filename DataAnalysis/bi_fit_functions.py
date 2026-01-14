@@ -423,7 +423,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
                 py.close(fig)
                 return
         except Exception as e:
-            if low_region==100 or low_region==40 or low_region==50:
+            if low_region==100 or low_region==40 or low_region==50 or low_region==125:
                 region=1
             elif low_region==500 or low_region==800 or low_region==1200:
                 region=2
@@ -438,16 +438,19 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
 def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,plot=False,detector_type='UDET'):
     sigs0_df = {'sig1':5,'sig2':5}
     sigs1_df = {'sig1':5,'sig2':6,'sig3':6}
+    # sigs2_df = {'sig1':5,'sig2':6,'sig3':6}
     sigs2_df = {'sig1':5,'sig2':6,'sig3':6}
 
     if detector_type=='UDET':
         peak_finder_props = (10,None,5,35,3,None,0.5,None)
     if detector_type=='LDET':
+        # peak_finder_props = (10,None,5,35,6,None,0.5,None)
         peak_finder_props = (10,None,5,35,6,None,0.5,None)
         if pixel=='1017' or pixel=='1021' or pixel=='1028' or pixel=='1032' or pixel=='1043' or pixel=='1054':
             low_region=50
         else:
-            low_region=100
+            # low_region=100
+            low_region=125
     results = {}
 
     for i in run_numbers:
@@ -514,7 +517,8 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
             low_region3 = 2700
             high_region3 = 3400
             if detector_type=='LDET':
-                peak_finder_props = (10,None,20,35,6,None,0.5,None)
+                # peak_finder_props = (10,None,20,35,6,None,0.5,None)
+                peak_finder_props = (10,None,20,35,10,None,0.5,None)
                 if pixel=='1017' or pixel=='1021' or pixel=='1028' or pixel=='1032' or pixel=='1043' or pixel=='1054':
                     low_region3 = 1500
                     high_region3 = 2500
