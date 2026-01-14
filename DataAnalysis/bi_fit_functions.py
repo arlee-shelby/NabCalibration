@@ -479,7 +479,7 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                         idx1 = 0
                 else:
                     # print('here3')
-                    if r['amp1']['value']<15 or r['sig1']['value']<3 or r['sig2']['value']<3:
+                    if r['amp1']['value']<15 or r['sig1']['value']<2 or r['sig2']['value']<2:
                         print('run: %d, pixel: %s too low amp, sig1 or sig2 region 1'%(i, pixel))
                         # print('here4')
                         pass
@@ -501,7 +501,7 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                     high_region2 = 900
             r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region2,high_region2,3,peak_finder_props,sigs1_df,plot=plot)
             try:
-                if r['amp1']['value']<15:
+                if r['amp1']['value']<15 or r['amp2']['value']<0 or r['amp3']['value']<0 or r['sig1']['value']<2 or r['sig2']['value']<2 or r['sig3']['value']<2:
                     print('run: %d, pixel: %s too low amp, region 2'%(i, pixel))
                     pass
                 else:
