@@ -1,7 +1,7 @@
 import sys
 import run_functions as rf
 
-metadata = rf.read_metadata_file('../GrafanaMetaDataFrom10_10_25_to_12_03_25.csv')
+metadata = rf.read_metadata_file('GrafanaMetaDataFrom10_10_25_to_12_03_25.csv')
 
 calibrated_runs = []
 for line in sys.stdin:

@@ -192,8 +192,8 @@ def calibrate_data(calibration_data_points,calibration_amplitude,calibration_ord
             if len(peaks)==8 and detector=='LDET' and (calibration_amplitude[pixels[i]][runs[j]]['peak1']['value']<25 or calibration_amplitude[pixels[i]][runs[j]]['peak2']['value']<20):
                 # print(pixels[i],runs[j])
                 peaks = list(calibration_data_points[pixels[i]][runs[j]].keys())[2:]
-            if len(peaks)>=6 and calibration_amplitude[pixels[i]][runs[j]]['peak3']['value']>50:
-                if detector=='LDET' and (calibration_amplitude[pixels[i]][runs[j]]['peak4']['value']>1 or calibration_amplitude[pixels[i]][runs[j]]['peak5']['value']>1):
+            if len(peaks)>=6 and calibration_amplitude[pixels[i]][runs[j]]['peak3']['value']>50 and calibration_amplitude[pixels[i]][runs[j]]['peak4']['value']>calibration_amplitude[pixels[i]][runs[j]]['peak5']['value']:
+                if detector=='LDET' and (calibration_amplitude[pixels[i]][runs[j]]['peak4']['value']<1 or calibration_amplitude[pixels[i]][runs[j]]['peak5']['value']<1):
                     continue
                 peak_values = []
                 peak_errors = []
@@ -253,7 +253,7 @@ def get_calibration_param_props(param_df,weighted=False):
     standard_deviation = {}
     average_error = {}
     for pixel in pixels:
-        if pixel =='95' or pixel=='1043' or pixel=='1054':
+        if pixel =='95' or pixel=='1043' or pixel=='1054' or pixel=='1020':
             continue
         else:
             runs = list(param_df[pixel].keys())
@@ -270,11 +270,75 @@ def get_calibration_param_props(param_df,weighted=False):
                 else:
                     standard_deviation[pixel] = np.std(values)
             if weighted==True:
-                average[pixel] = np.average(values,weights=errors)
+                weights = 1/(np.array(errors)**2)
+                av = np.average(values,weights=weights)
+                average[pixel] = av
                 if len(runs)==1:
                     continue
                 else:
-                    weights = 1/(np.array(errors)**2)
-                    varience = 1/np.sum(weights)
+                    varience = np.sum(weights*(np.array(values)-av)**2)/np.sum(weights)
+                    # varience = 1/np.sum(weights)
                     standard_deviation[pixel] = np.sqrt(varience)
     return average,average_error,standard_deviation
+
+def get_calibration_fit_df_for_db(results,quad=False):
+    pixels = list(results.keys())
+    df = {}
+    pixel_numbers = []
+    run_numbers = []
+    calibration_type = []
+    gain = []
+    gain_uncertainty = []
+    offset = []
+    offset_uncertainty = []
+    chi2 = []
+    reduced_chi2 = []
+    gain_offset_correlation = []
+    quadratic = []
+    quadratic_uncertainty = []
+    gain_quadratic_correlation = []
+    offset_quadratic_correlation = []
+    for pixel in pixels:
+        runs = list(results[pixel].keys())
+        if runs==[]:
+            continue
+        for run in runs:
+            pixel_numbers.append(int(pixel))
+            run_numbers.append(run)
+            gain.append(results[pixel][run].params['m'].value)
+            gain_uncertainty.append(results[pixel][run].params['m'].stderr)
+            offset.append(results[pixel][run].params['b'].value)
+            offset_uncertainty.append(results[pixel][run].params['b'].stderr)
+            chi2.append(results[pixel][run].chisqr)
+            reduced_chi2.append(results[pixel][run].redchi)
+            gain_offset_correlation.append(results[pixel][run].params['m'].correl['b'])
+
+            if quad==True:
+                calibration_type.append('quadratic')
+                quadratic.append(results[pixel][run].params['q'].value)
+                quadratic_uncertainty.append(results[pixel][run].params['q'].stderr)
+                gain_quadratic_correlation.append(results[pixel][run].params['m'].correl['q'])
+                offset_quadratic_correlation.append(results[pixel][run].params['b'].correl['q'])
+            else:
+                calibration_type.append('linear')
+                quadratic.append(None)
+                quadratic_uncertainty.append(None)
+                gain_quadratic_correlation.append(None)
+                offset_quadratic_correlation.append(None)
+    
+    df['pixel_number'] = pixel_numbers
+    df['run_number'] = run_numbers
+    df['calibration_type'] = calibration_type
+    df['gain'] = gain
+    df['gain_uncertainty'] = gain_uncertainty
+    df['offset'] = offset
+    df['offset_uncertainty'] = offset_uncertainty
+    df['quadratic'] = quadratic
+    df['quadratic_uncertainty'] = quadratic_uncertainty
+    df['chi2'] = chi2
+    df['reduced_chi2'] = reduced_chi2
+    df['gain_offset_correlation'] = gain_offset_correlation
+    df['gain_quadratic_correlation'] = gain_quadratic_correlation
+    df['offset_quadratic_correlation'] = offset_quadratic_correlation
+
+    return df

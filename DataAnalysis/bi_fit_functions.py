@@ -78,7 +78,8 @@ def add_bi_params(params,initial_peak_props):
     params.add('sig_ratio',value=0.05,min=0)
     params.add('amp_ratio',value=0.6,min=0, max=1)
 
-    params.add('slope',value=-1e-3)
+    # params.add('slope',value=-1e-3,min=-3) #for 91
+    params.add('slope',value=-1e-3) #original
     params.add('intercept',value=0)
 
     for i in range(params['num_peaks'].value):
@@ -86,27 +87,29 @@ def add_bi_params(params,initial_peak_props):
         params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
         params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
         params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
+        # if i==3:
+        #     # params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0,max=87.5)
+        #     params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],max=20)
         params.add('step%d_ratio'%i, value=0.01,min=-1e-1, max=1)
 
-def add_LDETbi_params(params,initial_peak_props):
+# def add_LDETbi_params(params,initial_peak_props):
 
-    params.add('slope',value=-1e-3)
-    params.add('intercept',value=0)
+#     params.add('slope',value=-1e-3)
+#     params.add('intercept',value=0)
 
-    for i in range(params['num_peaks'].value):
-        i+=1
-        params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
-        params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
-        # if i==1:
-        params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
-        # if i==2:
-        #     params.add('step%d_ratio'%i, value=0.01,min=0, max=1)
+#     for i in range(params['num_peaks'].value):
+#         i+=1
+#         params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
+#         params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
+#         # if i==1:
+#         params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
+#         # if i==2:
+#         #     params.add('step%d_ratio'%i, value=0.01,min=0, max=1)
 
 def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas):
     initial_peak_props = {}
     find_peaks.__defaults__ = peak_finder_props
     peaks, props = find_peaks(ydat)
-
     while len(peaks)>num_peaks:
         prop_list = list(peak_finder_props)
         prop_list[3] += 10
@@ -115,6 +118,7 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
         find_peaks.__defaults__ = peak_finder_props
 
         peaks, props = find_peaks(ydat)
+    print(peaks)
     for i in range(num_peaks):
         i += 1
         if len(peaks)==num_peaks:
@@ -129,7 +133,9 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
                 initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
             else:
                 initial_peak_props['amp%d'%i] = props['peak_heights'][-1]*0.5
-                initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+36
+                initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+15 #1017
+                # initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+36 #original
+                # initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+2 #for 91
                 initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
         else:
             if num_peaks==2:
@@ -158,78 +164,78 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
 
     return initial_peak_props
 
-def get_LDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas):
-    initial_peak_props = {}
-    find_peaks.__defaults__ = peak_finder_props
-    peaks, props = find_peaks(ydat)
-    num_peaks = num_peaks
+# def get_LDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas):
+#     initial_peak_props = {}
+#     find_peaks.__defaults__ = peak_finder_props
+#     peaks, props = find_peaks(ydat)
+#     num_peaks = num_peaks
 
-    if num_peaks==1:
-        initial_peak_props['amp1'] = np.max(ydat)
-        initial_peak_props['cen1'] = xdat[np.argmax(ydat)]+xdat[0]
-        initial_peak_props['sig1'] = initial_peak_sigmas['sig1']
-        initial_peak_props['amp2'] = initial_peak_props['amp1']
-        initial_peak_props['cen2'] = initial_peak_props['cen1']*1.2
-        initial_peak_props['sig2'] = initial_peak_sigmas['sig2']
-    else:
-        while len(peaks)>num_peaks:
-            prop_list = list(peak_finder_props)
-            prop_list[3] += 10
+#     if num_peaks==1:
+#         initial_peak_props['amp1'] = np.max(ydat)
+#         initial_peak_props['cen1'] = xdat[np.argmax(ydat)]+xdat[0]
+#         initial_peak_props['sig1'] = initial_peak_sigmas['sig1']
+#         initial_peak_props['amp2'] = initial_peak_props['amp1']
+#         initial_peak_props['cen2'] = initial_peak_props['cen1']*1.2
+#         initial_peak_props['sig2'] = initial_peak_sigmas['sig2']
+#     else:
+#         while len(peaks)>num_peaks:
+#             prop_list = list(peak_finder_props)
+#             prop_list[3] += 10
 
-            peak_finder_props = tuple(prop_list)
-            find_peaks.__defaults__ = peak_finder_props
+#             peak_finder_props = tuple(prop_list)
+#             find_peaks.__defaults__ = peak_finder_props
 
-            peaks, props = find_peaks(ydat)
-        for i in range(num_peaks):
-            i += 1
-            if len(peaks)==num_peaks:
-                initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
-                initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
-                initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-                if i==num_peaks:
-                    initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
-                    initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
-                    initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+#             peaks, props = find_peaks(ydat)
+        # for i in range(num_peaks):
+        #     i += 1
+        #     if len(peaks)==num_peaks:
+        #         initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
+        #         initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
+        #         initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+        #         if i==num_peaks:
+        #             initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
+        #             initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
+        #             initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
 
-                    initial_peak_props['amp%d'%(i+1)] = initial_peak_props['amp%d'%i]
-                    initial_peak_props['cen%d'%(i+1)] = initial_peak_props['cen%d'%i]
-                    initial_peak_props['sig%d'%(i+1)] = initial_peak_sigmas['sig%d'%i]
+        #             initial_peak_props['amp%d'%(i+1)] = initial_peak_props['amp%d'%i]
+        #             initial_peak_props['cen%d'%(i+1)] = initial_peak_props['cen%d'%i]
+        #             initial_peak_props['sig%d'%(i+1)] = initial_peak_sigmas['sig%d'%i]
             
-            elif len(peaks)==num_peaks-1:
-                if i!=num_peaks:
-                    initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
-                    initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
-                    initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-                else:
-                    initial_peak_props['amp%d'%i] = props['peak_heights'][-1]
-                    initial_peak_props['cen%d'%i] = xdat[peaks[-1]]
-                    initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-            else:
-                if num_peaks==2:
-                    if i<num_peaks:
-                        initial_peak_props['amp%d'%i] = max(ydat)
-                        initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0])
-                        initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-                    else:
-                        initial_peak_props['amp%d'%i] = max(ydat)*0.5
-                        initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0])+36
-                        initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-                if num_peaks==3:
-                    if i==1:
-                        amp_scale = 1
-                        cen_shift = 0
-                    if i==2:
-                        amp_scale = 1/3
-                        cen_shift = 216
-                    if i==3:
-                        amp_scale = 1/6
-                        cen_shift = 252
-                    initial_peak_props['amp%d'%i] = max(ydat)*amp_scale
-                    initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0]) + cen_shift
-                    initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+        #     elif len(peaks)==num_peaks-1:
+        #         if i!=num_peaks:
+        #             initial_peak_props['amp%d'%i] = props['peak_heights'][i-1]
+        #             initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
+        #             initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+        #         else:
+        #             initial_peak_props['amp%d'%i] = props['peak_heights'][-1]
+        #             initial_peak_props['cen%d'%i] = xdat[peaks[-1]]
+        #             initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+    #         else:
+    #             if num_peaks==2:
+    #                 if i<num_peaks:
+    #                     initial_peak_props['amp%d'%i] = max(ydat)
+    #                     initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0])
+    #                     initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+    #                 else:
+    #                     initial_peak_props['amp%d'%i] = max(ydat)*0.5
+    #                     initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0])+36
+    #                     initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+    #             if num_peaks==3:
+    #                 if i==1:
+    #                     amp_scale = 1
+    #                     cen_shift = 0
+    #                 if i==2:
+    #                     amp_scale = 1/3
+    #                     cen_shift = 216
+    #                 if i==3:
+    #                     amp_scale = 1/6
+    #                     cen_shift = 252
+    #                 initial_peak_props['amp%d'%i] = max(ydat)*amp_scale
+    #                 initial_peak_props['cen%d'%i] = (np.argmax(ydat)+xdat[0]) + cen_shift
+    #                 initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
 
 
-    return initial_peak_props
+    # return initial_peak_props
 
 # def get_bi_fit_short(data,time_data,num_groups,pixel,low_region,up_region,num_peaks,peak_finder_props,initial_peak_sigmas,plot=False):
 #     cnt = 0
@@ -267,97 +273,97 @@ def get_LDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
 #         df['time'][i] = time_data['%d'%i]['subgroup_start'][-8:]
 #     return df
 
-def get_LDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num_peaks,peak_finder_props,initial_peak_sigmas,plot=False):
-    cnt = 0
-    nrows,ncols=8,4
-    fig = py.figure(figsize=(8*ncols,6*nrows))
-    if not any(value==pixel for value in data.keys()):
-        py.close(fig)
-        return
-    else:
-        df = {}
-        df['time'] = {}
+# def get_LDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num_peaks,peak_finder_props,initial_peak_sigmas,plot=False):
+#     cnt = 0
+#     nrows,ncols=8,4
+#     fig = py.figure(figsize=(8*ncols,6*nrows))
+#     if not any(value==pixel for value in data.keys()):
+#         py.close(fig)
+#         return
+#     else:
+#         df = {}
+#         df['time'] = {}
 
-        xdat = np.array(bin_edges[low_region:up_region])
-        ydat = np.array(data[pixel][low_region:up_region])
+#         xdat = np.array(bin_edges[low_region:up_region])
+#         ydat = np.array(data[pixel][low_region:up_region])
 
-        alpha = get_hist_data_uncert(ydat)
+#         alpha = get_hist_data_uncert(ydat)
 
-        try:
-            initial_peak_props = get_LDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
+#         try:
+#             initial_peak_props = get_LDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
 
-        except Exception as e:
-            print('could not get initial peak props for run: %d, pixel: %s'%(run_number,pixel))
-            return
+#         except Exception as e:
+#             print('could not get initial peak props for run: %d, pixel: %s'%(run_number,pixel))
+#             return
         
-        params = Parameters()
-        params.add('num_peaks', value=num_peaks,vary=False)
-        try:
-            add_LDETbi_params(params,initial_peak_props)
-            # print(params)
-        except Exception as e:
-            print('could not add params, run: %d, pixel: %s, low reg: %d'%(run_number,pixel,low_region),e)
-            return
+#         params = Parameters()
+#         params.add('num_peaks', value=num_peaks,vary=False)
+#         try:
+#             add_LDETbi_params(params,initial_peak_props)
+#             # print(params)
+#         except Exception as e:
+#             print('could not add params, run: %d, pixel: %s, low reg: %d'%(run_number,pixel,low_region),e)
+#             return
 
-        if low_region<1000:
+#         if low_region<1000:
             # print(params)
-            params.add('delta',min=0.9,max=1.3)
-            params.add('cen2', value=initial_peak_props['cen1']*1.1,expr='cen1*delta')
-            # params.add('sig3',value=initial_peak_props['sig2'])
-            params.add('delta2',min=0.4,max=1,value=0.45)
-            params.add('amp2', value=initial_peak_props['amp1']*0.45,expr='amp1*delta2')
-            # params.add('delta1',min=-5,value=1.1)
-            params.add('sig2',value=initial_peak_props['sig1'],min=0,expr='sig1')
+        #     params.add('delta',min=0.9,max=1.3)
+        #     params.add('cen2', value=initial_peak_props['cen1']*1.1,expr='cen1*delta')
+        #     # params.add('sig3',value=initial_peak_props['sig2'])
+        #     params.add('delta2',min=0.4,max=1,value=0.45)
+        #     params.add('amp2', value=initial_peak_props['amp1']*0.45,expr='amp1*delta2')
+        #     # params.add('delta1',min=-5,value=1.1)
+        #     params.add('sig2',value=initial_peak_props['sig1'],min=0,expr='sig1')
         
-        if low_region>1000:
-            params.add('sig3',value=initial_peak_props['sig3'],min=0,expr='sig2')
-            params.add('delta2',min=0,max=1)
-            params.add('amp3',value=initial_peak_props['amp3'],min=0,expr='amp2*delta2')
-            params.add('delta3',min=1,max=1.03)
-            params.add('cen3',value=initial_peak_props['cen3'],min=0,expr='cen2*delta3')
-        model=LDETbi_model
-        residual_model = LDETbi_residual
+        # if low_region>1000:
+        #     params.add('sig3',value=initial_peak_props['sig3'],min=0,expr='sig2')
+        #     params.add('delta2',min=0,max=1)
+        #     params.add('amp3',value=initial_peak_props['amp3'],min=0,expr='amp2*delta2')
+        #     params.add('delta3',min=1,max=1.03)
+        #     params.add('cen3',value=initial_peak_props['cen3'],min=0,expr='cen2*delta3')
+        # model=LDETbi_model
+        # residual_model = LDETbi_residual
 
-        try:
-            bestfit, result = get_fit(model,residual_model, params, xdat, ydat,alpha)
+        # try:
+        #     bestfit, result = get_fit(model,residual_model, params, xdat, ydat,alpha)
 
-            if result.errorbars:
-                df['chi2'] = result.chisqr
-                df['red chi2'] = result.redchi
+        #     if result.errorbars:
+        #         df['chi2'] = result.chisqr
+        #         df['red chi2'] = result.redchi
 
-                if plot:
-                    cnt+=1
-                    ax=py.subplot(nrows,ncols,cnt)
-                    ax.step(xdat, ydat, alpha=0.5)
-                    ax.plot(xdat, bestfit,label='Run %d, Pixel %s red chi: %.2f'%(run_number,pixel,result.redchi))
-                    ax.set_ylabel('Counts')
-                    ax.set_xlabel('Energy (ADC)')
-                    ax.legend()
-                    py.show()
-                else:
-                    py.close(fig)
+        #         if plot:
+        #             cnt+=1
+        #             ax=py.subplot(nrows,ncols,cnt)
+        #             ax.step(xdat, ydat, alpha=0.5)
+        #             ax.plot(xdat, bestfit,label='Run %d, Pixel %s red chi: %.2f'%(run_number,pixel,result.redchi))
+        #             ax.set_ylabel('Counts')
+        #             ax.set_xlabel('Energy (ADC)')
+        #             ax.legend()
+        #             py.show()
+        #         else:
+        #             py.close(fig)
 
-                for key in result.params.keys():
-                    df['%s'%key] = {}
-                    df['%s'%key] = {}
-                    df['%s'%key]['value'] = result.params['%s'%key].value
-                    df['%s'%key]['error'] = result.params['%s'%key].stderr
-            else:
-                print("no errors found for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
-                py.close(fig)
-                return
-        except Exception as e:
-            if low_region<=1000:
-                region=1
-            elif low_region==1200:
-                region=2
-            elif low_region>2000:
-                region=3
+        #         for key in result.params.keys():
+        #             df['%s'%key] = {}
+        #             df['%s'%key] = {}
+        #             df['%s'%key]['value'] = result.params['%s'%key].value
+        #             df['%s'%key]['error'] = result.params['%s'%key].stderr
+        #     else:
+        #         print("no errors found for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
+        #         py.close(fig)
+        #         return
+        # except Exception as e:
+        #     if low_region<=1000:
+        #         region=1
+        #     elif low_region==1200:
+        #         region=2
+        #     elif low_region>2000:
+        #         region=3
             
-            print("failed Bi fit for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
-            py.close(fig)
-            return
-        return df
+        #     print("failed Bi fit for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
+        #     py.close(fig)
+        #     return
+        # return df
     
 def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num_peaks,peak_finder_props,initial_peak_sigmas,plot=False):
     cnt = 0
@@ -378,7 +384,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
 
         try:
             initial_peak_props = get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
-
+            print(initial_peak_props)
         except Exception as e:
             print('could not get initial peak props for run: %d, pixel: %s'%(run_number,pixel))
             return
@@ -425,9 +431,9 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
         except Exception as e:
             if low_region==100 or low_region==40 or low_region==50 or low_region==125:
                 region=1
-            elif low_region==500 or low_region==800 or low_region==1200:
+            elif low_region==500 or low_region==800 or low_region==1200 or low_region==30*4 or low_region==350: #added 30 for pixel 91
                 region=2
-            elif low_region==1100 or low_region==1500 or low_region==2700:
+            elif low_region==1100 or low_region==1500 or low_region==2700 or low_region==70*4 or low_region==750: #added 60 for 91
                 region=3
             
             print("failed Bi fit for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
@@ -436,26 +442,32 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
         return df
     
 def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,plot=False,detector_type='UDET'):
-    sigs0_df = {'sig1':5,'sig2':5}
+    # sigs0_df = {'sig1':6,'sig2':6}
+    sigs0_df = {'sig1':7,'sig2':7} #original
+    # sigs1_df = {'sig1':5,'sig2':7,'sig3':7} #1017, 1029 (run 8717)
+    # sigs1_df = {'sig1':5,'sig2':6,'sig3':6} #original, and 1017 (run 8829)
     sigs1_df = {'sig1':5,'sig2':6,'sig3':6}
-    # sigs2_df = {'sig1':5,'sig2':6,'sig3':6}
-    sigs2_df = {'sig1':5,'sig2':6,'sig3':6}
+    sigs2_df = {'sig1':5,'sig2':7,'sig3':7}
+
 
     if detector_type=='UDET':
-        peak_finder_props = (10,None,5,35,3,None,0.5,None)
+        # peak_finder_props = (10,None,5,35,3,None,0.5,None) #original
+        peak_finder_props = (10,None,1,35,3,None,0.5,None) # for 91
+        # peak_finder_props = (10,None,5,25,1,None,0.5,None) #for 95
     if detector_type=='LDET':
         # peak_finder_props = (10,None,5,35,6,None,0.5,None)
         peak_finder_props = (10,None,5,35,6,None,0.5,None)
         if pixel=='1017' or pixel=='1021' or pixel=='1028' or pixel=='1032' or pixel=='1043' or pixel=='1054':
-            low_region=50
+            low_region=100
         else:
             # low_region=100
-            low_region=125
+            low_region=100
     results = {}
 
     for i in run_numbers:
-        if not any(value==pixel for value in energy[i].keys()) or np.argmax(energy[i][pixel][low_region:])<300:
-            # print('cd pixel')
+        if not any(value==pixel for value in energy[i].keys()) or np.argmax(energy[i][pixel][low_region:])+low_region<60: #original <300
+            # v = np.argmax(energy[i][pixel][low_region:])
+            # print('here',v)
             pass
         
         else:
@@ -471,7 +483,11 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                     r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region,400,2,peak_finder_props,sigs0_df,plot=plot)
             else:
                 # print('here2')
-                r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region,400,2,peak_finder_props,sigs0_df,plot=plot)
+                if pixel=='91':
+                    r1=None
+                    pass
+                else:
+                    r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region,400,2,peak_finder_props,sigs0_df,plot=plot)
             try:
                 if detector_type=='UDET':
                     if r['amp1']['value']<15:
@@ -496,16 +512,25 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
             high_region2 = 1900
             if detector_type=='LDET':
                 if pixel=='1017' or pixel=='1021' or pixel=='1028' or pixel=='1032' or pixel=='1043' or pixel=='1054':
-                    low_region2 = 800
-                    high_region2 = 1300
+                    low_region2 = 800 #original
+                    high_region2 = 1200 #original
+                    # low_region2 = 350 #1017, 1032
+                    # high_region2 = 700 #1017, 1032
+                    # low_region2 = 300 #1021
+                    # high_region2 = 550 #1021
             if detector_type=='UDET':
                 if pixel=='9' or pixel=='91' or pixel=='95' or pixel=='96':
+                    sigs1_df = {'sig1':1,'sig2':1,'sig3':1} #for 91
                     low_region2 = 500
-                    high_region2 = 900
+                    high_region2 = 800
+                    #900 original (but wasn't actually working)
+                    low_region2 = 30*4 #for 91
+                    high_region2 = 50*4 # for 91
             r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region2,high_region2,3,peak_finder_props,sigs1_df,plot=plot)
             try:
-                if r['amp1']['value']<15 or r['amp2']['value']<0 or r['amp3']['value']<0 or r['sig1']['value']<2 or r['sig2']['value']<2 or r['sig3']['value']<2:
-                    print('run: %d, pixel: %s too low amp, region 2'%(i, pixel))
+                # if r['amp1']['value']<15 or r['amp2']['value']<0 or r['amp3']['value']<0 or r['sig1']['value']<2 or r['sig2']['value']<2 or r['sig3']['value']<2:
+                if r['amp1']['value']<15 or r['amp2']['value']<0:
+                    print('run: %d, pixel: %s too low amp, region 2'%(i, pixel),r)
                     pass
                 else:
                     r2 = r
@@ -520,12 +545,21 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                 # peak_finder_props = (10,None,20,35,6,None,0.5,None)
                 peak_finder_props = (10,None,20,35,10,None,0.5,None)
                 if pixel=='1017' or pixel=='1021' or pixel=='1028' or pixel=='1032' or pixel=='1043' or pixel=='1054':
-                    low_region3 = 1500
-                    high_region3 = 2500
+                    low_region3 = 1500 #original
+                    high_region3 = 2500 #original
+                    # low_region3 = 750 #1017, 1032
+                    # # high_region3 = 1250 #1017
+                    # high_region3 = 1250 #1032
+                    # low_region3 = 650 #1017
+                    # high_region3 = 950 #1017
             if detector_type=='UDET':
                 if pixel=='9' or pixel=='91' or pixel=='95' or pixel=='96':
+                    sigs2_df = {'sig1':1,'sig2':1,'sig3':1} #for 91
                     low_region3 = 1100
                     high_region3 = 1600
+                    low_region3 = 70*4 #for 91
+                    high_region3 = 90*4 #for 91
+                    peak_finder_props = (10,None,1,35,1,None,0.5,None)
             r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region3,high_region3,3,peak_finder_props,sigs2_df,plot=plot)
             try:
                 if r['amp1']['value']<15:
@@ -536,7 +570,7 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                     idx3 = 2
             except Exception as e:
                 pass
-
+            # print(r1,r2,r3)
             if r1!=None or r2!=None or r3!=None:
                 results[i] = {}
                 if r1!=None:
@@ -548,67 +582,67 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
         r = None
     return results
 
-def get_LDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,plot=False):
+# def get_LDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,plot=False):
     
-    peak_finder_props = (10,None,15,45,3,None,0.5,None)
-    sigs0_df = {'sig1':15,'sig2':25}
-    sigs1_df = {'sig1':25,'sig2':35,'sig3':35}
-    sigs2_df = {'sig1':30,'sig2':35,'sig3':35}
+#     peak_finder_props = (10,None,15,45,3,None,0.5,None)
+#     sigs0_df = {'sig1':15,'sig2':25}
+#     sigs1_df = {'sig1':25,'sig2':35,'sig3':35}
+#     sigs2_df = {'sig1':30,'sig2':35,'sig3':35}
 
-    results = {}
-    for i in run_numbers:
-        if not any(value==pixel for value in energy[i].keys()) or np.argmax(energy[i][pixel][40:])<300:
-            pass
+#     results = {}
+#     for i in run_numbers:
+#         if not any(value==pixel for value in energy[i].keys()) or (np.argmax(energy[i][pixel][40:])+40)<300:
+#             pass
         
-        else:
-            r1,r2,r3 = None,None,None
-            max_pnt = np.argmax(energy[i][pixel][:400])
-            # if max_pnt>50:
+#         else:
+#             r1,r2,r3 = None,None,None
+#             max_pnt = np.argmax(energy[i][pixel][:400])
+#             # if max_pnt>50:
+#             #     pass
+#             # else:
+#             #     low_region=max_pnt-70
+
+#             r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region,400,2,peak_finder_props,sigs0_df,plot=plot)
+#             try:
+#                 if r['amp1']['value']<15:
+#                     print('run: %d, pixel: %s too low amp, region 1'%(i, pixel))
+#                     pass
+#                 else:
+#                     r1 = r
+#                     idx1 = 0
+#             except Exception as e:
             #     pass
-            # else:
-            #     low_region=max_pnt-70
-
-            r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region,400,2,peak_finder_props,sigs0_df,plot=plot)
-            try:
-                if r['amp1']['value']<15:
-                    print('run: %d, pixel: %s too low amp, region 1'%(i, pixel))
-                    pass
-                else:
-                    r1 = r
-                    idx1 = 0
-            except Exception as e:
-                pass
             
-            r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,1200,1900,3,peak_finder_props,sigs1_df,plot=plot)
-            try:
-                if r['amp1']['value']<15:
-                    print('run: %d, pixel: %s too low amp, region 2'%(i, pixel))
-                    pass
-                else:
-                    r2 = r
-                    idx2 = 1
+            # r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,1200,1900,3,peak_finder_props,sigs1_df,plot=plot)
+            # try:
+            #     if r['amp1']['value']<15:
+            #         print('run: %d, pixel: %s too low amp, region 2'%(i, pixel))
+            #         pass
+            #     else:
+            #         r2 = r
+            #         idx2 = 1
 
-            except Exception as e:
-                pass
+            # except Exception as e:
+            #     pass
             
-            r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,2400,3400,3,peak_finder_props,sigs2_df,plot=plot)
-            try:
-                if r['amp1']['value']<15:
-                    print('run: %d, pixel: %s too low amp, region 3'%(i, pixel))
-                    pass
-                else:
-                    r3 = r
-                    idx3 = 2
-            except Exception as e:
-                pass
+            # r = get_LDETbi_fit_long(i,energy[i],bin_edges,pixel,2400,3400,3,peak_finder_props,sigs2_df,plot=plot)
+            # try:
+            #     if r['amp1']['value']<15:
+            #         print('run: %d, pixel: %s too low amp, region 3'%(i, pixel))
+            #         pass
+            #     else:
+            #         r3 = r
+            #         idx3 = 2
+            # except Exception as e:
+            #     pass
 
-            if r1!=None or r2!=None or r3!=None:
-                results[i] = {}
-                if r1!=None:
-                    results[i][idx1] = r1
-                if r2!=None:
-                    results[i][idx2] = r2
-                if r3!=None:
-                    results[i][idx3] = r3
+            # if r1!=None or r2!=None or r3!=None:
+            #     results[i] = {}
+            #     if r1!=None:
+            #         results[i][idx1] = r1
+    #             if r2!=None:
+    #                 results[i][idx2] = r2
+    #             if r3!=None:
+    #                 results[i][idx3] = r3
         
-    return results
+    # return results

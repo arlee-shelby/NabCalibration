@@ -1,7 +1,7 @@
 import pylab as py
 import numpy as np
 
-def plot_calibration_results(pixel,results,metadata,gain=False,offset=False,quad=False,column='date'):
+def plot_calibration_results(pixel,results,metadata,gain=False,offset=False,quad=False,column='date',title=None,ylabel=None,bottom_ylim=None,top_ylim=None):
     nrows,ncols=1,1
     py.figure(figsize=((6)*ncols,(4)*nrows))
     ax=py.subplot(nrows,ncols,1)
@@ -15,8 +15,12 @@ def plot_calibration_results(pixel,results,metadata,gain=False,offset=False,quad
         if quad==True:
             ax.errorbar(x,results[pixel][run].params['q'].value,results[pixel][run].params['q'].stderr,fmt='o')
     ax.tick_params(axis='x', labelrotation=90)
+    ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
+    ax.set_xlabel(column)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
 
-def plot_goodness_of_fit(results,chi2=False,reduced_chi2=False,bottom_ylim=None,top_ylim=None):
+def plot_goodness_of_fit(results,chi2=False,reduced_chi2=False,bottom_ylim=None,top_ylim=None,title=None,ylabel=None):
     nrows,ncols=1,1
     py.figure(figsize=((6)*ncols,(4)*nrows))
     ax=py.subplot(nrows,ncols,1)
@@ -31,8 +35,11 @@ def plot_goodness_of_fit(results,chi2=False,reduced_chi2=False,bottom_ylim=None,
                 ax.scatter(x,results[pixel][run].redchi)
     ax.set_xticks(range(int(pixels[0]),int(pixels[-1]),10))
     ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
+    ax.set_xlabel('Pixel')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
 
-def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df=None):
+def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df=None,title=None,ylabel=None,bottom_ylim=None,top_ylim=None):
     nrows,ncols=1,1
     py.figure(figsize=((6)*ncols,(4)*nrows))
     ax=py.subplot(nrows,ncols,1)
@@ -42,31 +49,46 @@ def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df
     values = list(param_prop_df.values())
     ax.scatter(int_pixels,values,color='C0')
     mean = np.average(values)
-    ax.axhline(mean,linestyle='dashed',label = 'Average: %.2e'%mean,color='C0')
+    ax.axhline(mean,linestyle='dashed',label = 'UDET average: %.2e'%mean,color='C0')
     if LDETparam_prop_df!=None:
         LDETpixels = list(LDETparam_prop_df.keys())
         LDETvalues = list(LDETparam_prop_df.values())
         LDETint_pixels = list(map(int, LDETpixels))
         ax.scatter(np.array(LDETint_pixels)-1000,LDETvalues,color='C1')
         mean = np.average(LDETvalues)
-        ax.axhline(mean,linestyle='dashed',label = 'Average: %.2e'%mean,color='C1')
+        ax.axhline(mean,linestyle='dashed',label = 'LDET average: %.2e'%mean,color='C1')
     ax.set_xticks(range(min(int_pixels),max(int_pixels),10))
     ax.set_yscale(yscale)
+    ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
+    ax.set_xlabel('Pixel')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
     ax.legend()
 
-def plot_peak_fit_params(parameters,peak='peak1',bottom_ylim=None,top_ylim=None):
+def plot_peak_fit_params(parameters,peak='peak1',bottom_ylim=None,top_ylim=None,title=None,ylabel=None,detector_type='UDET'):
     nrows,ncols=1,1
     py.figure(figsize=((6)*ncols,(4)*nrows))
     ax=py.subplot(nrows,ncols,1)
     pixels = list(parameters.keys())
-    ax.set_xticks(range(int(pixels[0]),int(pixels[-1]),10))
+    int_pixels = list(map(int, pixels))
     for pixel in pixels:
         runs = list(parameters[pixel].keys())
         for run in runs:
             try:
                 error = parameters[pixel][run][peak]['error']
                 value = parameters[pixel][run][peak]['value']
-                ax.errorbar(pixel,value,yerr=error,fmt='o')
+                if detector_type=='UDET':
+                    pixel_value = int(pixel)
+                if detector_type=='LDET':
+                    pixel_value = int(pixel)-1000
+                ax.errorbar(pixel_value,value,yerr=error,fmt='o',color='C1')
             except Exception as e:
                 pass
+    if detector_type=='UDET':
+        ax.set_xticks(range(min(int_pixels),max(int_pixels),10))
+    if detector_type=='LDET':
+        ax.set_xticks(range(min(int_pixels)-1000,max(int_pixels)-1000,10))
     ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
+    ax.set_xlabel('Pixel')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
