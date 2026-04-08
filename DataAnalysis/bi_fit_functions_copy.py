@@ -16,8 +16,6 @@ def bi_model(params,x):
 
     sig_ratio = params['sig_ratio'].value
     amp_ratio = params['amp_ratio'].value
-    sig_ratio = params['sig_ratio2'].value
-    amp_ratio = params['amp_ratio2'].value
 
     intercept = params['intercept'].value
     slope = params['slope'].value
@@ -32,7 +30,7 @@ def bi_model(params,x):
 
         z = (x-cen)/sig
 
-        peak = gauss(z,amp) + lower_exp(z,amp_ratio*amp,sig_ratio*sig) + step_function(z,step_ratio*amp) + upper_exp(z,amp_ratio2*amp,sig_ratio2*sig)
+        peak = gauss(z,amp) + lower_exp(z,amp_ratio*amp,sig_ratio*sig) + step_function(z,step_ratio*amp)
         peak_func += peak
     
     linear_background = background(x, slope, intercept)
@@ -49,9 +47,6 @@ def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
         params.add('sig_ratio',value=0.05,min=0)
         params.add('amp_ratio',value=0.6,min=0, max=1)
 
-        params.add('sig_ratio2',value=0.05,min=0)
-        params.add('amp_ratio2',value=0.6,min=0, max=1)
-
         params.add('slope',value=-1e-3) #original
         params.add('intercept',value=0)
 
@@ -65,9 +60,6 @@ def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
     else:
         params.add('sig_ratio',value=initial_parameter_values['sig_ratio'],min=0)
         params.add('amp_ratio',value=initial_parameter_values['amp_ratio'],min=0, max=1)
-
-        params.add('sig_ratio2',value=initial_parameter_values['sig_ratio2'],min=0)
-        params.add('amp_ratio2',value=initial_parameter_values['amp_ratio2'],min=0, max=1)
 
         params.add('slope',value=initial_parameter_values['slope']) #original
         params.add('intercept',value=initial_parameter_values['intercept'])
