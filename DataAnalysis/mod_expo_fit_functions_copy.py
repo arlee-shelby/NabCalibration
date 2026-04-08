@@ -99,8 +99,8 @@ def get_initial_mod_expo_peak_props(xdat,ydat,peak_finder_props,num_peaks,initia
     if source=='bi':
         initial_peak_props = get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
         initial_peak_props['n1'] = 0.7
-        initial_peak_props['cen_ratio'] = 1
-        initial_peak_props['amp_ratio'] = 1
+        initial_peak_props['cen_ratio'] = 0
+        initial_peak_props['amp_ratio'] = 0
     
     if source=='cd' or source=='sn':
         initial_peak_props = {}
