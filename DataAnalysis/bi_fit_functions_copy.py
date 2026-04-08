@@ -172,6 +172,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
         residual_model = bi_residual
 
         try:
+            print(params,len(params))
             bestfit, result = get_fit(model,residual_model, params, xdat, ydat,alpha)
 
             if result.errorbars:
