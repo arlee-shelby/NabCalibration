@@ -425,18 +425,18 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
                     df['%s'%key]['value'] = result.params['%s'%key].value
                     df['%s'%key]['error'] = result.params['%s'%key].stderr
             else:
-                print("no errors found for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
+                print("no errors found for run: %d, pixel: %s, region "%(run_number,pixel))
                 py.close(fig)
                 return
         except Exception as e:
-            if low_region==100 or low_region==40 or low_region==50 or low_region==125:
-                region=1
-            elif low_region==500 or low_region==800 or low_region==1200 or low_region==30*4 or low_region==350: #added 30 for pixel 91
-                region=2
-            elif low_region==1100 or low_region==1500 or low_region==2700 or low_region==70*4 or low_region==750: #added 60 for 91
-                region=3
+            # if low_region==100 or low_region==40 or low_region==50 or low_region==125:
+            #     region=1
+            # elif low_region==500 or low_region==800 or low_region==1200 or low_region==30*4 or low_region==350: #added 30 for pixel 91
+            #     region=2
+            # elif low_region==1100 or low_region==1500 or low_region==2700 or low_region==70*4 or low_region==750: #added 60 for 91
+            #     region=3
             
-            print("failed Bi fit for run: %d, pixel: %s, region %d"%(run_number,pixel,region))
+            print("failed Bi fit for run: %d, pixel: %s, region"%(run_number,pixel))
             py.close(fig)
             return
         return df
