@@ -4,6 +4,7 @@ import pylab as py
 from scipy.signal import find_peaks
 from DataAnalysis.basic_functions import gauss
 from DataAnalysis.basic_functions import lower_exp
+from DataAnalysis.basic_functions import upper_exp
 from DataAnalysis.basic_functions import step_function
 from DataAnalysis.basic_functions import background
 from DataAnalysis.basic_functions import get_hist_data_uncert
@@ -29,7 +30,7 @@ def bi_model(params,x):
 
         z = (x-cen)/sig
 
-        peak = gauss(z,amp) + lower_exp(z,amp_ratio*amp,sig_ratio*sig) + step_function(z,step_ratio*amp)
+        peak = gauss(z,amp) + lower_exp(z,amp_ratio*amp,sig_ratio*sig) + step_function(z,step_ratio*amp) + upper_exp(z,amp_ratio*amp,sig_ratio*sig)
         peak_func += peak
     
     linear_background = background(x, slope, intercept)

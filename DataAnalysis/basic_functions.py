@@ -12,6 +12,9 @@ def step_function(z,p6):
 def lower_exp(z,p4,p5):
     return p4*(np.exp(p5*z))/(1+np.exp(z))**4
 
+def upper_exp(z,p9,p10):
+    return p9*(np.exp(p10*z))/(1+np.exp(-z))**4
+
 def background(x,p7,p8):
     return p7*x+p8
 
