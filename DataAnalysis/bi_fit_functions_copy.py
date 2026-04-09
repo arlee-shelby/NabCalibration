@@ -11,11 +11,12 @@ from DataAnalysis.basic_functions import background
 from DataAnalysis.basic_functions import get_hist_data_uncert
 from DataAnalysis.basic_functions import get_fit
 
-def lower_exp2(x,x0,beta,n,sig,amp):
-    return (amp*n/2*beta)*np.exp((sig**2/(2*beta**2))+((x-x0)/beta))*(1-special.erf((x-x0)/(np.sqrt(2)*sig) + sig/(np.sqrt(2)*beta)))
+def lower_exp2(x,x0,beta,sig,amp):
+    return (amp)*np.exp((sig**2/(2*beta**2))+((x-x0)/beta))*(1-special.erf((x-x0)/(np.sqrt(2)*sig) + sig/(np.sqrt(2)*beta)))
+#     return (amp*n)*np.exp((sig**2/(2*beta**2))+((x-x0)/beta))*(1-special.erf((x-x0)/(np.sqrt(2)*sig) + sig/(np.sqrt(2)*beta)))
 
-def step_function2(x,amp,h,x0,sig):
-    return (amp*h/2)*(1-special.erf((x-x0)/(np.sqrt(2)*sig)))
+def step_function2(x,amp,x0,sig):
+    return (amp)*(1-special.erf((x-x0)/(np.sqrt(2)*sig)))
 
 def bi_model(params,x):
 
@@ -26,20 +27,21 @@ def bi_model(params,x):
 
     intercept = params['intercept'].value
     slope = params['slope'].value
-
+    beta = params['beta'].value
+    
     peak_func = 0
-    for i in range(num_peaks):
+    for i in range(int(num_peaks)):
         i+=1
         amp = params['amp%d'%i].value
         cen = params['cen%d'%i].value
         sig = params['sig%d'%i].value
-        beta = params['beta%d'%i].value
+#         beta = params['beta%d'%i].value
         n= params['n%d'%i].value
         h = params['h%d'%i]
 
         z = (x-cen)/sig
 
-        peak = gauss(z,amp*(1-n)) + lower_exp2(x,cen,beta,n,sig,amp) + step_function2(x,amp,h,cen,sig)
+        peak = gauss(z,amp*(1-n)) + lower_exp2(x,cen,beta,sig,amp*n) + step_function2(x,amp*h,cen,sig)
         peak_func += peak
     
     linear_background = background(x, slope, intercept)
@@ -58,13 +60,13 @@ def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
 
         params.add('slope',value=-1e-3) #original
         params.add('intercept',value=0)
-
+        params.add('beta',value=10)
         for i in range(params['num_peaks'].value):
             i+=1
             params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
             params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
             params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
-            params.add('beta%d'%i,value=10,min=0)
+#             params.add('beta%d'%i,value=10)
             params.add('n%d'%i,value=0.6,min=0,max=1)
             params.add('h%d'%i,0.1,min=0,max=1)
             # params.add('step%d_ratio'%i, value=0.01,min=-1e-1, max=1)
