@@ -43,6 +43,17 @@ def modified_expo_model(params, x):
         func+=peak_func
     return func
 
+# def modified_expo_model2(params,x):
+#     num_peaks = params['num_peaks'].value
+#     source = params['source'].value
+#     func = 0
+#     for i in range(num_peaks):
+#         i+=1
+#         cen = params['cen%d'%i].value
+#         sig = params['sig%d'%i].value
+#         area = params['area%d'%i].value
+
+
 def modified_expo_residual(params, x, y, alpha):
     model = modified_expo_model(params, x)
     return (model - y) / alpha

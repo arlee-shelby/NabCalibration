@@ -1,6 +1,7 @@
 import numpy as np
 from lmfit import Parameters
 import pylab as py
+from scipy import special
 from scipy.signal import find_peaks
 from DataAnalysis.basic_functions import gauss
 from DataAnalysis.basic_functions import lower_exp
@@ -10,12 +11,18 @@ from DataAnalysis.basic_functions import background
 from DataAnalysis.basic_functions import get_hist_data_uncert
 from DataAnalysis.basic_functions import get_fit
 
+def lower_exp2(x,x0,beta,n,sig,amp):
+    return (amp*n/2*beta)*np.exp((sig**2/(2*beta**2))+((x-x0)/beta))*(1-special.erf((x-x0)/(np.sqrt(2)*sig) + sig/(np.sqrt(2)*beta)))
+
+def step_function2(x,amp,h,x0,sig):
+    return (amp*h/2)*(1-special.erf((x-x0)/(np.sqrt(2)*sig)))
+
 def bi_model(params,x):
 
     num_peaks = params['num_peaks'].value
 
-    sig_ratio = params['sig_ratio'].value
-    amp_ratio = params['amp_ratio'].value
+    # sig_ratio = params['sig_ratio'].value
+    # amp_ratio = params['amp_ratio'].value
 
     intercept = params['intercept'].value
     slope = params['slope'].value
@@ -26,11 +33,13 @@ def bi_model(params,x):
         amp = params['amp%d'%i].value
         cen = params['cen%d'%i].value
         sig = params['sig%d'%i].value
-        step_ratio = params['step%d_ratio'%i].value
+        beta = params['beta%d'%i].value
+        n= params['n%d'%i].value
+        h = params['h%d'%i]
 
         z = (x-cen)/sig
 
-        peak = gauss(z,amp) + lower_exp(z,amp_ratio*amp,sig_ratio*sig) + step_function(z,step_ratio*amp)
+        peak = gauss(z,amp*(1-n)) + lower_exp2(x,cen,beta,n,sig,amp) + step_function2(x,amp,h,cen,sig)
         peak_func += peak
     
     linear_background = background(x, slope, intercept)
@@ -44,8 +53,8 @@ def bi_residual(params, x, y, alpha):
 def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
 
     if initial_parameter_values==None:
-        params.add('sig_ratio',value=0.05,min=0)
-        params.add('amp_ratio',value=0.6,min=0, max=1)
+        # params.add('sig_ratio',value=0.05,min=0)
+        # params.add('amp_ratio',value=0.6,min=0, max=1)
 
         params.add('slope',value=-1e-3) #original
         params.add('intercept',value=0)
@@ -55,11 +64,14 @@ def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
             params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
             params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
             params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
-            params.add('step%d_ratio'%i, value=0.01,min=-1e-1, max=1)
+            params.add('beta%d'%i,value=10,min=0)
+            params.add('n%d'%i,value=0.6,min=0,max=1)
+            params.add('h%d'%i,0.1,min=0,max=1)
+            # params.add('step%d_ratio'%i, value=0.01,min=-1e-1, max=1)
 
     else:
-        params.add('sig_ratio',value=initial_parameter_values['sig_ratio'],min=0)
-        params.add('amp_ratio',value=initial_parameter_values['amp_ratio'],min=0, max=1)
+        # params.add('sig_ratio',value=initial_parameter_values['sig_ratio'],min=0)
+        # params.add('amp_ratio',value=initial_parameter_values['amp_ratio'],min=0, max=1)
 
         params.add('slope',value=initial_parameter_values['slope']) #original
         params.add('intercept',value=initial_parameter_values['intercept'])
@@ -69,7 +81,10 @@ def add_bi_params(params,initial_peak_props,initial_parameter_values=None):
             params.add('amp%d'%i,value=initial_peak_props['amp%d'%i],min=0)
             params.add('cen%d'%i,value=initial_peak_props['cen%d'%i],min=0)
             params.add('sig%d'%i,value=initial_peak_props['sig%d'%i],min=0)
-            params.add('step%d_ratio'%i, value=initial_parameter_values['step%d_ratio'%i],min=-1e-1, max=1)
+            params.add('beta%d'%i,value=initial_parameter_values['beta%d'%i],min=0)
+            params.add('n%d'%i,value=initial_parameter_values['n%d'%i],min=0,max=1)
+            params.add('h%d'%i,value=initial_parameter_values['h%d'%i],min=0,max=1)
+            # params.add('step%d_ratio'%i, value=initial_parameter_values['step%d_ratio'%i],min=-1e-1, max=1)
 
 def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas):
     initial_peak_props = {}
