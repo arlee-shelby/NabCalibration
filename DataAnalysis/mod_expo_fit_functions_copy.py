@@ -68,7 +68,7 @@ def add_modified_expo_params(params,initial_peak_props):
         # params.add('sig%d'%i,value = initial_peak_props['sig%d'%i],min=0,max=10)
         params.add('sig%d'%i,value = initial_peak_props['sig%d'%i],min=0)
         if params['source'].value==3:
-            params.add('area%d'%i,value = initial_peak_props['amp%d'%i],min=0)
+            params.add('area%d'%i,value = initial_peak_props['area%d'%i],min=0)
         else:
             params.add('area%d'%i,value = initial_peak_props['area%d'%i],min=0)
 
@@ -110,33 +110,35 @@ def get_initial_mod_expo_peak_props(xdat,ydat,peak_finder_props,num_peaks,initia
         if j==1:
             initial_peak_props['t%d'%j]=10.2
         else:
-            initial_peak_props['delta%d'%(j-1)] = 50*(j-1)
-    else:
+            initial_peak_props['delta%d'%(j-1)] = 100*(j-1)
+#     else:
+    find_peaks.__defaults__ = peak_finder_props
+    peaks, props = find_peaks(ydat)
+    while len(peaks)>num_peaks:
+        prop_list = list(peak_finder_props)
+        prop_list[3] += 10
+        peak_finder_props = tuple(prop_list)
         find_peaks.__defaults__ = peak_finder_props
         peaks, props = find_peaks(ydat)
-        while len(peaks)>num_peaks:
-            prop_list = list(peak_finder_props)
-            prop_list[3] += 10
-            peak_finder_props = tuple(prop_list)
-            find_peaks.__defaults__ = peak_finder_props
-            peaks, props = find_peaks(ydat)
-        if source=='cd':
-            initial_peak_props['cen_ratio'] = 1.05
-            initial_peak_props['amp_ratio'] = 0.25
-            initial_peak_props['n1'] = 0.7
-        if source=='sn':
-            initial_peak_props['cen_ratio'] = 1.03
-            initial_peak_props['amp_ratio'] = 0.25
-            initial_peak_props['n1'] = 0.9
-        for i in range(num_peaks):
-            i+=1
-            # initial_peak_props['area%d'%i] = props['peak_heights'][i-1]
-            # initial_peak_props['cen%d'%i] = xdat[peaks[i]]
-            # initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
-            # if len(peaks)==num_peaks:
-            initial_peak_props['area%d'%i] = props['peak_heights'][i-1]
-            initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
-            initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+    if source=='cd':
+        initial_peak_props['cen_ratio'] = 1.05
+        initial_peak_props['amp_ratio'] = 0.25
+        initial_peak_props['n1'] = 0.7
+    if source=='sn':
+        initial_peak_props['cen_ratio'] = 1.03
+        initial_peak_props['amp_ratio'] = 0.25
+        initial_peak_props['n1'] = 0.9
+        
+    for i in range(num_peaks):
+        i+=1
+        # initial_peak_props['area%d'%i] = props['peak_heights'][i-1]
+        # initial_peak_props['cen%d'%i] = xdat[peaks[i]]
+        # initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
+        # if len(peaks)==num_peaks:
+#         print(props['peak_heights'][i-1]*3)
+        initial_peak_props['area%d'%i] = props['peak_heights'][i-1]*3
+        initial_peak_props['cen%d'%i] = xdat[peaks[i-1]]
+        initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
 
     return initial_peak_props
 
@@ -215,6 +217,7 @@ def get_mod_expo_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,n
             print("could not get initial fit params for run: %d, pixel: %s"%(run_number,pixel))
             py.close(fig)
             return {}
+        
         params = Parameters()
         params.add('num_peaks', value=num_peaks,vary=False)
         params.add('num_mods', value=num_mods,vary=False)
