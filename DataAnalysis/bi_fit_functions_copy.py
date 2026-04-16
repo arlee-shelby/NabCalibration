@@ -100,7 +100,7 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
         find_peaks.__defaults__ = peak_finder_props
 
         peaks, props = find_peaks(ydat)
-    print(peaks)
+#     print(peaks)
     for i in range(num_peaks):
         i += 1
         if len(peaks)==num_peaks:
@@ -161,7 +161,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
 
         try:
             initial_peak_props = get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
-            print(initial_peak_props)
+#             print(initial_peak_props)
         except Exception as e:
             print('could not get initial peak props for run: %d, pixel: %s'%(run_number,pixel))
             return
@@ -181,7 +181,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
         residual_model = bi_residual
 
         try:
-            print(params,len(params))
+#             print(params,len(params))
             bestfit, result = get_fit(model,residual_model, params, xdat, ydat,alpha)
 
             if result.errorbars:
