@@ -100,7 +100,7 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
         find_peaks.__defaults__ = peak_finder_props
 
         peaks, props = find_peaks(ydat)
-#     print(peaks)
+    # print(peaks)
     for i in range(num_peaks):
         i += 1
         if len(peaks)==num_peaks:

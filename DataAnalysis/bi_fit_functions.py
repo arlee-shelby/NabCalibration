@@ -118,7 +118,7 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
         find_peaks.__defaults__ = peak_finder_props
 
         peaks, props = find_peaks(ydat)
-    print(peaks)
+    # print(peaks)
     for i in range(num_peaks):
         i += 1
         if len(peaks)==num_peaks:
@@ -133,8 +133,8 @@ def get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_pea
                 initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
             else:
                 initial_peak_props['amp%d'%i] = props['peak_heights'][-1]*0.5
-                initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+15 #1017
-                # initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+36 #original
+                # initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+15 #1017
+                initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+36 #original
                 # initial_peak_props['cen%d'%i] = xdat[peaks[-1]]+2 #for 91
                 initial_peak_props['sig%d'%i] = initial_peak_sigmas['sig%d'%i]
         else:
@@ -384,7 +384,7 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
 
         try:
             initial_peak_props = get_UDETinitial_peak_props(xdat,ydat,peak_finder_props,num_peaks,initial_peak_sigmas)
-            print(initial_peak_props)
+            # print(initial_peak_props)
         except Exception as e:
             print('could not get initial peak props for run: %d, pixel: %s'%(run_number,pixel))
             return
@@ -443,16 +443,16 @@ def get_UDETbi_fit_long(run_number,data,bin_edges,pixel,low_region,up_region,num
     
 def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,plot=False,detector_type='UDET'):
     # sigs0_df = {'sig1':6,'sig2':6}
-    sigs0_df = {'sig1':7,'sig2':7} #original
+    sigs0_df = {'sig1':5,'sig2':5} #original
     # sigs1_df = {'sig1':5,'sig2':7,'sig3':7} #1017, 1029 (run 8717)
     # sigs1_df = {'sig1':5,'sig2':6,'sig3':6} #original, and 1017 (run 8829)
     sigs1_df = {'sig1':5,'sig2':6,'sig3':6}
-    sigs2_df = {'sig1':5,'sig2':7,'sig3':7}
+    sigs2_df = {'sig1':5,'sig2':6,'sig3':6}
 
 
     if detector_type=='UDET':
-        # peak_finder_props = (10,None,5,35,3,None,0.5,None) #original
-        peak_finder_props = (10,None,1,35,3,None,0.5,None) # for 91
+        peak_finder_props = (10,None,5,35,3,None,0.5,None) #original
+        # peak_finder_props = (10,None,1,35,3,None,0.5,None) # for 91
         # peak_finder_props = (10,None,5,25,1,None,0.5,None) #for 95
     if detector_type=='LDET':
         # peak_finder_props = (10,None,5,35,6,None,0.5,None)
@@ -465,7 +465,7 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
     results = {}
 
     for i in run_numbers:
-        if not any(value==pixel for value in energy[i].keys()) or np.argmax(energy[i][pixel][low_region:])+low_region<60: #original <300
+        if not any(value==pixel for value in energy[i].keys()) or np.argmax(energy[i][pixel][low_region:])+low_region<300: #original <300
             # v = np.argmax(energy[i][pixel][low_region:])
             # print('here',v)
             pass
@@ -524,13 +524,13 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                     low_region2 = 500
                     high_region2 = 800
                     #900 original (but wasn't actually working)
-                    low_region2 = 30*4 #for 91
-                    high_region2 = 50*4 # for 91
+                    # low_region2 = 30*4 #for 91
+                    # high_region2 = 50*4 # for 91
             r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region2,high_region2,3,peak_finder_props,sigs1_df,plot=plot)
             try:
                 # if r['amp1']['value']<15 or r['amp2']['value']<0 or r['amp3']['value']<0 or r['sig1']['value']<2 or r['sig2']['value']<2 or r['sig3']['value']<2:
                 if r['amp1']['value']<15 or r['amp2']['value']<0:
-                    print('run: %d, pixel: %s too low amp, region 2'%(i, pixel),r)
+                    print('run: %d, pixel: %s too low amp, region 2'%(i, pixel))
                     pass
                 else:
                     r2 = r
@@ -557,8 +557,8 @@ def get_UDETbi_fit_results(energy, bin_edges, pixel, run_numbers,low_region=40,p
                     sigs2_df = {'sig1':1,'sig2':1,'sig3':1} #for 91
                     low_region3 = 1100
                     high_region3 = 1600
-                    low_region3 = 70*4 #for 91
-                    high_region3 = 90*4 #for 91
+                    # low_region3 = 70*4 #for 91
+                    # high_region3 = 90*4 #for 91
                     peak_finder_props = (10,None,1,35,1,None,0.5,None)
             r = get_UDETbi_fit_long(i,energy[i],bin_edges,pixel,low_region3,high_region3,3,peak_finder_props,sigs2_df,plot=plot)
             try:

@@ -65,9 +65,9 @@ def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df
     ax.set_title(title)
     ax.legend()
 
-def plot_peak_fit_params(parameters,peak='peak1',bottom_ylim=None,top_ylim=None,title=None,ylabel=None,detector_type='UDET'):
+def plot_peak_fit_params(parameters,parameters2=None,peak='peak1',bottom_ylim=None,top_ylim=None,title=None,ylabel=None,detector_type='UDET'):
     nrows,ncols=1,1
-    py.figure(figsize=((6)*ncols,(4)*nrows))
+    py.figure(figsize=((8)*ncols,(6)*nrows))
     ax=py.subplot(nrows,ncols,1)
     pixels = list(parameters.keys())
     int_pixels = list(map(int, pixels))
@@ -79,16 +79,41 @@ def plot_peak_fit_params(parameters,peak='peak1',bottom_ylim=None,top_ylim=None,
                 value = parameters[pixel][run][peak]['value']
                 if detector_type=='UDET':
                     pixel_value = int(pixel)
+                    c = 'C0'
                 if detector_type=='LDET':
                     pixel_value = int(pixel)-1000
-                ax.errorbar(pixel_value,value,yerr=error,fmt='o',color='C1')
+                    c = 'C0'
+                ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c)
             except Exception as e:
                 pass
     if detector_type=='UDET':
-        ax.set_xticks(range(min(int_pixels),max(int_pixels),10))
+        ax.set_xticks(range(min(int_pixels),max(int_pixels),12))
     if detector_type=='LDET':
-        ax.set_xticks(range(min(int_pixels)-1000,max(int_pixels)-1000,10))
+        ax.set_xticks(range(min(int_pixels)-1000,max(int_pixels)-1000,12))
+    if parameters2!=None:
+        pixels2 = list(parameters2.keys())
+        for pixel in pixels2:
+            runs = list(parameters2[pixel].keys())
+            for run in runs:
+                try:
+                    error = parameters2[pixel][run][peak]['error']
+                    value = parameters2[pixel][run][peak]['value']
+                    if detector_type=='UDET':
+                        pixel_value = int(pixel)-1000
+                        c = 'C0'
+                    if detector_type=='LDET':
+                        pixel_value = int(pixel)-1000
+                        c = 'C1'
+                    ax.errorbar(pixel_value,value,yerr=error,fmt='o',color='C1')
+                except Exception as e:
+                    pass
+    # if detector_type=='UDET':
+    #     ax.set_xticks(range(min(int_pixels),max(int_pixels),12))
+    # if detector_type=='LDET':
+    #     ax.set_xticks(range(min(int_pixels)-1000,max(int_pixels)-1000,12))
+
     ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
-    ax.set_xlabel('Pixel')
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
+    ax.set_xlabel('Pixel',fontsize=20)
+    ax.set_ylabel(ylabel,fontsize=20)
+    ax.set_title(title,fontsize=20)
+    ax.tick_params(axis='both', which='major', labelsize=20)
