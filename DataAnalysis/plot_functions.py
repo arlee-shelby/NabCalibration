@@ -67,7 +67,7 @@ def plot_calibration_param_props(param_prop_df,yscale='linear',LDETparam_prop_df
 
 def plot_peak_fit_params(parameters,parameters2=None,peak='peak1',bottom_ylim=None,top_ylim=None,title=None,ylabel=None,detector_type='UDET'):
     nrows,ncols=1,1
-    py.figure(figsize=((8)*ncols,(6)*nrows))
+    py.figure(figsize=((10)*ncols,(8)*nrows))
     ax=py.subplot(nrows,ncols,1)
     pixels = list(parameters.keys())
     int_pixels = list(map(int, pixels))
@@ -83,7 +83,10 @@ def plot_peak_fit_params(parameters,parameters2=None,peak='peak1',bottom_ylim=No
                 if detector_type=='LDET':
                     pixel_value = int(pixel)-1000
                     c = 'C0'
-                ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c)
+                if pixel=='11' and run==8655:
+                    ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c,label = 'UDET 2025')
+                else:
+                    ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c)
             except Exception as e:
                 pass
     if detector_type=='UDET':
@@ -100,11 +103,14 @@ def plot_peak_fit_params(parameters,parameters2=None,peak='peak1',bottom_ylim=No
                     value = parameters2[pixel][run][peak]['value']
                     if detector_type=='UDET':
                         pixel_value = int(pixel)-1000
-                        c = 'C0'
+                        c = 'C1'
                     if detector_type=='LDET':
                         pixel_value = int(pixel)-1000
                         c = 'C1'
-                    ax.errorbar(pixel_value,value,yerr=error,fmt='o',color='C1')
+                    if pixel=='1012' and run==8644:
+                        ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c,label = 'LDET 2025')
+                    else:
+                        ax.errorbar(pixel_value,value,yerr=error,fmt='o',color=c)
                 except Exception as e:
                     pass
     # if detector_type=='UDET':
@@ -112,8 +118,9 @@ def plot_peak_fit_params(parameters,parameters2=None,peak='peak1',bottom_ylim=No
     # if detector_type=='LDET':
     #     ax.set_xticks(range(min(int_pixels)-1000,max(int_pixels)-1000,12))
 
+    ax.legend(fontsize=25)
     ax.set_ylim(bottom=bottom_ylim,top=top_ylim)
-    ax.set_xlabel('Pixel',fontsize=20)
-    ax.set_ylabel(ylabel,fontsize=20)
-    ax.set_title(title,fontsize=20)
-    ax.tick_params(axis='both', which='major', labelsize=20)
+    ax.set_xlabel('Pixel',fontsize=30)
+    ax.set_ylabel(ylabel,fontsize=30)
+    ax.set_title(title,fontsize=30)
+    ax.tick_params(axis='both', which='major', labelsize=30)
